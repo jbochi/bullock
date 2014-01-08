@@ -1,5 +1,6 @@
-import redis
 import bullock
+import redis
+import time
 
 TEST_DB = 14
 
@@ -61,3 +62,12 @@ def test_lock_cannot_be_released_if_locked_by_another_instance():
     b2 = Bullock(key="mykey")
     assert not b2.lock()
     assert not b2.release()
+
+
+def test_lock_expires():
+    b = Bullock(ttl=0.1)
+    assert b.lock()
+    time.sleep(0.05)
+    assert not b.lock()
+    time.sleep(0.2)
+    assert b.lock()
