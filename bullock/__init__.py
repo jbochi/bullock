@@ -2,6 +2,7 @@ import redis
 import uuid
 import time
 
+WAIT_DELAY = 0.01
 
 class Bullock(object):
     def __init__(self, key=None, host='localhost', port=6379, db=0, ttl=3600):
@@ -41,7 +42,7 @@ class Bullock(object):
 
     def wait(self):
         while not self.locked:
-            time.sleep(self._time_to_expire + 0.01)
+            time.sleep(self._time_to_expire + WAIT_DELAY)
             self.locked = self.acquire()
         return True
 
