@@ -2,4 +2,4 @@
 Bullock
 =======
 
-Inspired by `Sherlock <https://github.com/RealGeeks/sherlock>`_.
+A distributed lock using Redis. Inspired by `Sherlock <https://github.com/RealGeeks/sherlock>`_.
