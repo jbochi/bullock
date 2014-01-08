@@ -51,3 +51,8 @@ def test_another_instance_can_acquire_lock_after_it_is_released():
     assert not b2.lock()
     assert b1.release()
     assert b2.lock()
+
+
+def test_lock_cannot_be_released_if_not_locking():
+    b = Bullock()
+    assert not b.release()
