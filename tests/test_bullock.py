@@ -37,7 +37,6 @@ def test_cannot_lock_twice():
 def test_can_acquire_lock_after_it_is_released():
     b = Bullock()
     assert b.lock()
-    assert not b.lock()
     assert b.release()
     assert b.lock()
 
@@ -45,8 +44,6 @@ def test_can_acquire_lock_after_it_is_released():
 def test_another_instance_can_acquire_lock_after_it_is_released():
     b1 = Bullock(key="mykey")
     assert b1.lock()
-    assert not b1.lock()
-
     b2 = Bullock(key="mykey")
     assert not b2.lock()
     assert b1.release()
@@ -56,3 +53,11 @@ def test_another_instance_can_acquire_lock_after_it_is_released():
 def test_lock_cannot_be_released_if_not_locking():
     b = Bullock()
     assert not b.release()
+
+
+def test_lock_cannot_be_released_if_locked_by_another_instance():
+    b1 = Bullock(key="mykey")
+    b1.lock()
+    b2 = Bullock(key="mykey")
+    assert not b2.lock()
+    assert not b2.release()
