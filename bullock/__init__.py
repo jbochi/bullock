@@ -9,3 +9,6 @@ class Bullock(object):
 
     def lock(self):
         return self.redis.setnx(self.key, "locked")
+
+    def release(self):
+        return self.redis.delete(self.key)

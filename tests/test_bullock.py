@@ -32,3 +32,11 @@ def test_cannot_lock_twice():
     b = Bullock()
     assert b.lock()
     assert not b.lock()
+
+
+def test_can_acquire_lock_after_it_is_released():
+    b = Bullock()
+    assert b.lock()
+    assert not b.lock()
+    assert b.release()
+    assert b.lock()
