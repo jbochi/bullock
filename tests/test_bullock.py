@@ -94,3 +94,11 @@ def test_can_acquire_locked_lock_if_blocking():
     assert b1.acquire()
     b2 = Bullock("mykey")
     assert b2.acquire(blocking=True)
+
+
+def test_with_statement():
+    with Bullock("mykey") as l:
+        assert l.locked
+        b = Bullock("mykey")
+        assert not b.acquire()
+    assert b.acquire()

@@ -11,6 +11,13 @@ class Bullock(object):
         self.locked = False
         self.expiration = None
 
+    def __enter__(self):
+        self.acquire(blocking=True)
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.release()
+
     def acquire(self, blocking=False):
         expiration = self._new_expiration
         self.locked = self.redis.setnx(self.key, expiration)
