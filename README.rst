@@ -24,9 +24,10 @@ Usage
     # do critical work here
     lock.release()
 
-You can also use a with statement:
+You can also use the with statement:
 
-..code:: python
+.. code:: python
+
     from bullock import Bullock
     with Bullock(host="redis-hostname", key="my-first-lock", ttl=3600):
         # do critical work here
