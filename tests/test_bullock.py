@@ -71,3 +71,10 @@ def test_lock_expires():
     assert not b.lock()
     time.sleep(0.2)
     assert b.lock()
+
+
+def test_cannot_release_if_lock_has_expired():
+    b = Bullock(ttl=0.1)
+    assert b.lock()
+    time.sleep(0.2)
+    assert not b.release()

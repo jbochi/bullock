@@ -18,7 +18,7 @@ class Bullock(object):
         return self.locking
 
     def release(self):
-        if not self.locking:
+        if not self.locking or self._expired():
             return False
         return self.redis.delete(self.key)
 
