@@ -9,10 +9,14 @@ class Bullock(object):
         self.ttl = ttl
         self.redis = redis.StrictRedis(host=host, port=port, db=db)
         self.locked = False
+        self.expiration = None
 
     def lock(self):
-        self.locked = self.redis.setnx(self.key, self._new_expiration_time)
-        if self._expired:
+        expiration = self._new_expiration
+        self.locked = self.redis.setnx(self.key, expiration)
+        if self.locked:
+            self.expiration = expiration
+        elif self._expired:
             self.locked = self._update_expiration()
         return self.locked
 
@@ -24,21 +28,24 @@ class Bullock(object):
     def renew(self):
         if not self._locking:
             return False
-        self._update_expiration()
-        return True
+        return self._update_expiration()
 
     def _update_expiration(self):
-        old_expiration = float(self.redis.getset(self.key, self._new_expiration_time))
-        return old_expiration < time.time()
+        expiration = self._new_expiration
+        old_expiration = float(self.redis.getset(self.key, expiration))
+        if old_expiration < time.time() or old_expiration == self.expiration:
+            self.expiration = expiration
+            return True
+        return False
 
     @property
     def _locking(self):
-        return self.locked and not self._expired
+        return self.locked and time.time() < self.expiration and not self._expired
 
     @property
     def _expired(self):
         return float(self.redis.get(self.key)) < time.time()
 
     @property
-    def _new_expiration_time(self):
+    def _new_expiration(self):
         return time.time() + self.ttl
