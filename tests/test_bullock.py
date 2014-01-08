@@ -87,3 +87,10 @@ def test_can_renew_lock_to_prevent_it_from_expiring():
         time.sleep(0.05)
         assert b.renew()
     assert b.release()
+
+
+def test_can_acquire_locked_lock_if_blocking():
+    b1 = Bullock("mykey", ttl=0.5)
+    assert b1.acquire()
+    b2 = Bullock("mykey")
+    assert b2.acquire(blocking=True)

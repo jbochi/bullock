@@ -11,13 +11,15 @@ class Bullock(object):
         self.locked = False
         self.expiration = None
 
-    def acquire(self):
+    def acquire(self, blocking=False):
         expiration = self._new_expiration
         self.locked = self.redis.setnx(self.key, expiration)
         if self.locked:
             self.expiration = expiration
         elif self._expired:
             self.locked = self._update_expiration()
+        if blocking:
+            self.wait()
         return self.locked
 
     def release(self):
@@ -29,6 +31,12 @@ class Bullock(object):
         if not self._locking:
             return False
         return self._update_expiration()
+
+    def wait(self):
+        while not self.locked:
+            time.sleep(self._time_to_expire + 0.01)
+            self.locked = self.acquire()
+        return True
 
     def _update_expiration(self):
         expiration = self._new_expiration
@@ -43,8 +51,15 @@ class Bullock(object):
         return self.locked and time.time() < self.expiration and not self._expired
 
     @property
+    def _time_to_expire(self):
+        timestamp = self.redis.get(self.key)
+        if not timestamp:
+            return 0
+        return max(float(timestamp) - time.time(), 0)
+
+    @property
     def _expired(self):
-        return float(self.redis.get(self.key)) < time.time()
+        return self._time_to_expire == 0
 
     @property
     def _new_expiration(self):
