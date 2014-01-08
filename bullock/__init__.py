@@ -1,6 +1,7 @@
 import redis
 import uuid
 
+
 class Bullock(object):
     def __init__(self, key=None, host='localhost', port=6379, db=0):
         self.key = key if key else uuid.uuid4()

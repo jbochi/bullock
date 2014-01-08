@@ -14,6 +14,7 @@ def setup_function(func):
     r = redis.StrictRedis(db=TEST_DB)
     r.flushdb()
 
+
 def test_can_acquire_lock():
     b = Bullock()
     assert b.lock()
@@ -25,3 +26,9 @@ def test_cannot_acquire_lock_if_other_is_locking():
 
     b2 = Bullock(key="mykey")
     assert not b2.lock()
+
+
+def test_cannot_lock_twice():
+    b = Bullock()
+    assert b.lock()
+    assert not b.lock()
