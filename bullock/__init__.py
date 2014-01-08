@@ -11,7 +11,7 @@ class Bullock(object):
         self.locked = False
         self.expiration = None
 
-    def lock(self):
+    def acquire(self):
         expiration = self._new_expiration
         self.locked = self.redis.setnx(self.key, expiration)
         if self.locked:

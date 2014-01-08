@@ -18,37 +18,37 @@ def setup_function(func):
 
 def test_can_acquire_lock():
     b = Bullock()
-    assert b.lock()
+    assert b.acquire()
 
 
 def test_cannot_acquire_lock_if_other_is_locking():
     b1 = Bullock(key="mykey")
-    assert b1.lock()
+    assert b1.acquire()
 
     b2 = Bullock(key="mykey")
-    assert not b2.lock()
+    assert not b2.acquire()
 
 
-def test_cannot_lock_twice():
+def test_cannot_acquire_lock_twice():
     b = Bullock()
-    assert b.lock()
-    assert not b.lock()
+    assert b.acquire()
+    assert not b.acquire()
 
 
 def test_can_acquire_lock_after_it_is_released():
     b = Bullock()
-    assert b.lock()
+    assert b.acquire()
     assert b.release()
-    assert b.lock()
+    assert b.acquire()
 
 
 def test_another_instance_can_acquire_lock_after_it_is_released():
     b1 = Bullock(key="mykey")
-    assert b1.lock()
+    assert b1.acquire()
     b2 = Bullock(key="mykey")
-    assert not b2.lock()
+    assert not b2.acquire()
     assert b1.release()
-    assert b2.lock()
+    assert b2.acquire()
 
 
 def test_lock_cannot_be_released_if_not_locking():
@@ -58,31 +58,31 @@ def test_lock_cannot_be_released_if_not_locking():
 
 def test_lock_cannot_be_released_if_locked_by_another_instance():
     b1 = Bullock(key="mykey")
-    b1.lock()
+    b1.acquire()
     b2 = Bullock(key="mykey")
-    assert not b2.lock()
+    assert not b2.acquire()
     assert not b2.release()
 
 
 def test_lock_expires():
     b = Bullock(ttl=0.1)
-    assert b.lock()
+    assert b.acquire()
     time.sleep(0.05)
-    assert not b.lock()
+    assert not b.acquire()
     time.sleep(0.2)
-    assert b.lock()
+    assert b.acquire()
 
 
 def test_cannot_release_if_lock_has_expired():
     b = Bullock(ttl=0.1)
-    assert b.lock()
+    assert b.acquire()
     time.sleep(0.2)
     assert not b.release()
 
 
 def test_can_renew_lock_to_prevent_it_from_expiring():
     b = Bullock(ttl=0.1)
-    assert b.lock()
+    assert b.acquire()
     for i in xrange(10):
         time.sleep(0.05)
         assert b.renew()
