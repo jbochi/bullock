@@ -11,7 +11,7 @@ setup(
     description='Distributed lock using Redis',
     long_description=README,
     author='Juarez Bochi',
-    version='0.0.2',
+    version='0.0.3',
     include_package_data=True,
     install_requires=install_reqs,
     packages=['bullock'],
