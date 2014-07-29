@@ -32,4 +32,6 @@ You can also use the with statement:
     with Bullock(host="redis-hostname", key="my-first-lock", ttl=3600):
         # do critical work here
 
-For more examples, see tests.
+For more examples, see tests_.
+
+.. _tests: https://github.com/jbochi/bullock/blob/master/tests/test_bullock.py
