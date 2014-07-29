@@ -4,6 +4,9 @@ Bullock
 
 A distributed lock using Redis. Inspired by `Sherlock <https://github.com/RealGeeks/sherlock>`_.
 
+.. image:: https://travis-ci.org/jbochi/bullock.svg?branch=master
+    :target: https://travis-ci.org/jbochi/bullock
+
 
 Installation
 ------------
