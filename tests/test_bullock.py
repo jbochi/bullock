@@ -29,10 +29,17 @@ def test_cannot_acquire_lock_if_other_is_locking():
     assert not b2.acquire()
 
 
-def test_cannot_acquire_lock_twice():
+def test_can_acquire_lock_twice():
     b = Bullock("mylock")
     assert b.acquire()
-    assert not b.acquire()
+    assert b.acquire()
+
+
+def test_can_acquire_lock_with_same_value():
+    b1 = Bullock("mylock", value="uniquevalue")
+    b2 = Bullock("mylock", value="uniquevalue")
+    assert b1.acquire()
+    assert b2.acquire()
 
 
 def test_can_acquire_lock_after_it_is_released():
@@ -65,12 +72,11 @@ def test_lock_cannot_be_released_if_locked_by_another_instance():
 
 
 def test_lock_expires():
-    b = Bullock("mylock", ttl=0.1)
-    assert b.acquire()
+    assert Bullock("mylock", ttl=0.1).acquire()
     time.sleep(0.05)
-    assert not b.acquire()
+    assert not Bullock("mylock", ttl=0.1).acquire()
     time.sleep(0.2)
-    assert b.acquire()
+    assert Bullock("mylock", ttl=0.1).acquire()
 
 
 def test_cannot_release_if_lock_has_expired():

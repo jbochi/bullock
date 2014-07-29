@@ -1,13 +1,36 @@
 import redis
 import time
+import uuid
+
 
 WAIT_DELAY = 0.01
 
 class Bullock(object):
-    def __init__(self, key, host='localhost', port=6379, db=0, password=None, ttl=3600):
+    def __init__(self, key, value=None, host='localhost', port=6379, db=0, password=None, ttl=3600):
         self.key = key
         self.ttl = ttl
+        self.value = value or str(uuid.uuid4())
         self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
+        self._acquire_lock = self.redis.register_script("""
+            local key = KEYS[1]
+            local value = ARGV[1]
+            local ttl = ARGV[2]
+            local current_value = redis.call('GET', key)
+            if current_value == value or current_value == false then
+                redis.call('PSETEX', key, ttl, value)
+                return 1
+            end
+            return 0
+        """)
+        self._release = self.redis.register_script("""
+            local key = KEYS[1]
+            local value = ARGV[1]
+            if redis.call("GET", key) == value then
+                return redis.call("DEL", key)
+            else
+                return 0
+            end
+        """)
         self.locked = False
         self.expiration = None
 
@@ -19,25 +42,19 @@ class Bullock(object):
         self.release()
 
     def acquire(self, blocking=False):
-        expiration = self._new_expiration
-        self.locked = self.redis.setnx(self.key, expiration)
+        expiration = time.time() + self.ttl
+        self.locked = bool(self._acquire_lock(keys=[self.key], args=[self.value, int(self.ttl * 1000)]))
         if self.locked:
             self.expiration = expiration
-        elif self._expired:
-            self.locked = self._update_expiration()
         if blocking:
             self.wait()
         return self.locked
 
     def release(self):
-        if not self._locking:
-            return False
-        return self.redis.delete(self.key)
+        return bool(self._release(keys=[self.key], args=[self.value]))
 
     def renew(self):
-        if not self._locking:
-            return False
-        return self._update_expiration()
+        return self.acquire(blocking=False)
 
     def wait(self):
         while not self.locked:
@@ -45,29 +62,6 @@ class Bullock(object):
             self.locked = self.acquire()
         return True
 
-    def _update_expiration(self):
-        expiration = self._new_expiration
-        old_expiration = float(self.redis.getset(self.key, expiration))
-        if old_expiration < time.time() or old_expiration == self.expiration:
-            self.expiration = expiration
-            return True
-        return False
-
-    @property
-    def _locking(self):
-        return self.locked and time.time() < self.expiration and not self._expired
-
     @property
     def _time_to_expire(self):
-        timestamp = self.redis.get(self.key)
-        if not timestamp:
-            return 0
-        return max(float(timestamp) - time.time(), 0)
-
-    @property
-    def _expired(self):
-        return self._time_to_expire == 0
-
-    @property
-    def _new_expiration(self):
-        return time.time() + self.ttl
+        return float(self.redis.pttl(self.key) or 0) / 1000
