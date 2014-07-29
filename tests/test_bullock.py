@@ -6,9 +6,9 @@ TEST_DB = 14
 
 class Bullock(bullock.Bullock):
     "A modified lock that uses a db different from default since we flush it before all tests"
-    def __init__(self, *args, **kwargs):
+    def __init__(self, key, *args, **kwargs):
         kwargs['db'] = TEST_DB
-        super(Bullock, self).__init__(*args, **kwargs)
+        super(Bullock, self).__init__(key, *args, **kwargs)
 
 
 def setup_function(func):
@@ -17,7 +17,7 @@ def setup_function(func):
 
 
 def test_can_acquire_lock():
-    b = Bullock()
+    b = Bullock("mylock")
     assert b.acquire()
 
 
@@ -30,13 +30,13 @@ def test_cannot_acquire_lock_if_other_is_locking():
 
 
 def test_cannot_acquire_lock_twice():
-    b = Bullock()
+    b = Bullock("mylock")
     assert b.acquire()
     assert not b.acquire()
 
 
 def test_can_acquire_lock_after_it_is_released():
-    b = Bullock()
+    b = Bullock("mylock")
     assert b.acquire()
     assert b.release()
     assert b.acquire()
@@ -52,7 +52,7 @@ def test_another_instance_can_acquire_lock_after_it_is_released():
 
 
 def test_lock_cannot_be_released_if_not_locking():
-    b = Bullock()
+    b = Bullock("mylock")
     assert not b.release()
 
 
@@ -65,7 +65,7 @@ def test_lock_cannot_be_released_if_locked_by_another_instance():
 
 
 def test_lock_expires():
-    b = Bullock(ttl=0.1)
+    b = Bullock("mylock", ttl=0.1)
     assert b.acquire()
     time.sleep(0.05)
     assert not b.acquire()
@@ -74,14 +74,14 @@ def test_lock_expires():
 
 
 def test_cannot_release_if_lock_has_expired():
-    b = Bullock(ttl=0.1)
+    b = Bullock("mylock", ttl=0.1)
     assert b.acquire()
     time.sleep(0.2)
     assert not b.release()
 
 
 def test_can_renew_lock_to_prevent_it_from_expiring():
-    b = Bullock(ttl=0.1)
+    b = Bullock("mylock", ttl=0.1)
     assert b.acquire()
     for i in xrange(10):
         time.sleep(0.05)

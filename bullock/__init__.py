@@ -1,12 +1,11 @@
 import redis
-import uuid
 import time
 
 WAIT_DELAY = 0.01
 
 class Bullock(object):
-    def __init__(self, key=None, host='localhost', port=6379, db=0, password=None, ttl=3600):
-        self.key = key if key else uuid.uuid4()
+    def __init__(self, key, host='localhost', port=6379, db=0, password=None, ttl=3600):
+        self.key = key
         self.ttl = ttl
         self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
         self.locked = False
