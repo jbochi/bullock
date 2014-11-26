@@ -41,6 +41,11 @@ def test_can_acquire_lock_with_same_value():
     assert b1.acquire()
     assert b2.acquire()
 
+def test_can_acquire_lock_with_same_numeric_value():
+    b1 = Bullock("mylock", value=0)
+    b2 = Bullock("mylock", value=0)
+    assert b1.acquire()
+    assert b2.acquire()
 
 def test_can_acquire_lock_after_it_is_released():
     b = Bullock("mylock")

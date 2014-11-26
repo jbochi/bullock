@@ -9,7 +9,7 @@ class Bullock(object):
     def __init__(self, key, value=None, host='localhost', port=6379, db=0, password=None, ttl=3600):
         self.key = key
         self.ttl = ttl
-        self.value = value or str(uuid.uuid4())
+        self.value = value if value is not None else str(uuid.uuid4())
         self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
         self._acquire_lock = self.redis.register_script("""
             local key = KEYS[1]
