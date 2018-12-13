@@ -35,6 +35,16 @@ You can also use the with statement:
     with Bullock(host="redis-hostname", key="my-first-lock", ttl=3600):
         # do critical work here
 
+Also supports using redis cluster:
+
+.. code:: python
+
+    from bullock import Bullock
+    lock = Bullock(host="redis-hostname", key="my-first-lock", ttl=3600, redis_cluster=True)
+    lock.acquire(blocking=True)
+    # do critical work here
+    lock.release()
+
 For more examples, see tests_.
 
 .. _tests: https://github.com/jbochi/bullock/blob/master/tests/test_bullock.py
