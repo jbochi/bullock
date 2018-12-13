@@ -1,0 +1,25 @@
+version: '2'
+services:
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+
+  test:
+    command: py.test
+    extends:
+      service: base
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+
+  redis:
+    image: redis:latest
+
+  redis-cluster:
+    image: grokzen/redis-cluster:4.0.2

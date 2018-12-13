@@ -4,7 +4,16 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
-install: "pip install -r requirements-dev.txt"
-script: py.test
+
 services:
-  - redis
+  - docker
+dist: trusty
+
+env:
+  COMPOSE_VERSION: 18.06
+
+install: docker-compose build
+
+script: docker-compose run --rm test
+
+after_script: docker-compose down

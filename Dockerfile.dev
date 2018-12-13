@@ -1,0 +1,11 @@
+FROM python:2.7-alpine
+
+RUN mkdir /app
+
+WORKDIR /app
+
+ADD requirements-dev.txt requirements.txt /app/
+
+RUN pip install -r requirements-dev.txt
+
+ADD . /app
