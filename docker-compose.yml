@@ -8,7 +8,7 @@ services:
       - .:/app
 
   test:
-    command: py.test
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
     extends:
       service: base
     links:
