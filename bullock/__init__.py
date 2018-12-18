@@ -1,4 +1,5 @@
 import redis
+import rediscluster
 import time
 import uuid
 
@@ -6,11 +7,14 @@ import uuid
 WAIT_DELAY = 0.01
 
 class Bullock(object):
-    def __init__(self, key, value=None, host='localhost', port=6379, db=0, password=None, ttl=3600):
+    def __init__(self, key, value=None, host='localhost', port=6379, db=0, password=None, ttl=3600, redis_cluster=False):
         self.key = key
         self.ttl = ttl
         self.value = value if value is not None else str(uuid.uuid4())
-        self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
+        if redis_cluster:
+            self.redis = rediscluster.StrictRedisCluster(host=host, port=port, password=password)
+        else:
+            self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
         self._acquire_lock = self.redis.register_script("""
             local key = KEYS[1]
             local value = ARGV[1]

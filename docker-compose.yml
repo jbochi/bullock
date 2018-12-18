@@ -1,0 +1,91 @@
+version: '2'
+services:
+  test-2.7:
+    build:
+      context: .
+      dockerfile: Dockerfile-2.7
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
+    volumes:
+      - .:/app
+
+  test-3.3:
+    build:
+      context: .
+      dockerfile: Dockerfile-3.3
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
+    volumes:
+      - .:/app
+
+  test-3.4:
+    build:
+      context: .
+      dockerfile: Dockerfile-3.4
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
+    volumes:
+      - .:/app
+
+  test-3.5:
+    build:
+      context: .
+      dockerfile: Dockerfile-3.5
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
+    volumes:
+      - .:/app
+
+  test-3.6:
+    build:
+      context: .
+      dockerfile: Dockerfile-3.6
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
+    volumes:
+      - .:/app
+
+  test-3.7:
+    build:
+      context: .
+      dockerfile: Dockerfile-3.7
+    links:
+      - redis
+      - redis-cluster
+    depends_on:
+      - redis
+      - redis-cluster
+    command: sh -c "./wait-for-redis.sh redis 6379 && ./wait-for-redis.sh redis-cluster 7000 && py.test"
+    volumes:
+      - .:/app
+
+  redis:
+    image: redis:latest
+
+  redis-cluster:
+    image: grokzen/redis-cluster:4.0.2
