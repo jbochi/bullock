@@ -12,7 +12,7 @@ setup(
     long_description=README,
     author='Juarez Bochi',
     author_email='jbochi+github@gmail.com',
-    version='0.0.5',
+    version='1.0.0',
     include_package_data=True,
     install_requires=install_reqs,
     packages=['bullock'],
