@@ -128,3 +128,17 @@ def test_with_statement(redis_type):
         b = Bullock("mykey", redis_cluster=(redis_type==REDIS_CLUSTER))
         assert not b.acquire(), "failed to acquire for %s" % redis_type
     assert b.acquire(), "failed to acquire for %s" % redis_type
+
+
+def test_can_reuse_available_regular_redis_connection():
+    r = redis.StrictRedis(host='redis', port='6379')
+    r.flushdb()
+    b = Bullock("mylock", redis=r)
+    assert b.acquire(), "failed to acquire while reusing connection"
+
+
+def test_can_reuse_available_cluster_redis_connection():
+    r = rediscluster.StrictRedisCluster(host='redis-cluster', port='7000')
+    r.flushdb()
+    b = Bullock("mylock", redis=r)
+    assert b.acquire(), "failed to acquire while reusing connection"
