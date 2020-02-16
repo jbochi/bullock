@@ -7,14 +7,16 @@ import uuid
 WAIT_DELAY = 0.01
 
 class Bullock(object):
-    def __init__(self, key, value=None, host='localhost', port=6379, db=0, password=None, ttl=3600, redis_cluster=False):
+    def __init__(self, key, value=None, **kwargs):
         self.key = key
-        self.ttl = ttl
+        self.ttl = kwargs.pop("ttl", 3600)
         self.value = value if value is not None else str(uuid.uuid4())
-        if redis_cluster:
-            self.redis = rediscluster.StrictRedisCluster(host=host, port=port, password=password)
+
+        if kwargs.get("redis"):
+            self.redis = kwargs["redis"]
         else:
-            self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
+            self.connect(**kwargs)
+
         self._acquire_lock = self.redis.register_script("""
             local key = KEYS[1]
             local value = ARGV[1]
@@ -37,6 +39,12 @@ class Bullock(object):
         """)
         self.locked = False
         self.expiration = None
+
+    def connect(self, host='localhost', port=6379, db=0, password=None, redis_cluster=False):
+        if redis_cluster:
+            self.redis = rediscluster.StrictRedisCluster(host=host, port=port, password=password)
+        else:
+            self.redis = redis.StrictRedis(host=host, port=port, db=db, password=password)
 
     def __enter__(self):
         self.acquire(blocking=True)
